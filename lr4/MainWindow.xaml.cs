@@ -15,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using Timer = System.Threading.Timer;
-[assembly: InternalsVisibleTo("чат.Test")]
+[assembly: InternalsVisibleTo("lr4.Tests")]
 
 namespace LumaChat;
 
