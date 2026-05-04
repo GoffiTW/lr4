@@ -12,6 +12,7 @@ public static class ChatUtils
         try { return Encoding.UTF8.GetString(Convert.FromBase64String(s)); }
         catch { return ""; }
     }
+
     public static bool TryReadPort(string portText, out int port)
     {
         return int.TryParse(portText, out port) && port > 0 && port <= 65535;
