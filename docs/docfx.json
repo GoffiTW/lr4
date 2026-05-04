@@ -1,0 +1,37 @@
+﻿
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": ["../lr4.csproj"],
+          "src": "../"
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net10.0-windows"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["**/*.md"],
+        "exclude": ["_site/**"]
+      }
+    ],
+    "resource": [
+      {
+        "files": ["images/**", "screenshot.png"]
+      }
+    ],
+    "overwrite": [],
+    "dest": "_site",
+    "globalMetadata": {
+      "_appTitle": "Luma TCP Chat API",
+      "_appFooter": "Copyright © 2026",
+      "_enableSearch": true
+    }
+  }
+}
