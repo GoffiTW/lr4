@@ -45,3 +45,5 @@
 2. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/your-repo/luma-chat.git
+
+# test ci
