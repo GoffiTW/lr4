@@ -1,0 +1,48 @@
+﻿name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Run manual tests
+      run: dotnet run --project чат.Tests.Console/чат.Tests.Console.csproj --configuration Release
+
+    - name: Publish application
+      run: dotnet publish чат.csproj -c Release -o publish --self-contained false
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LumaChat.exe
+        path: publish/
+
+    - name: Generate documentation
+      run: |
+        dotnet tool install -g docfx
+        docfx docs/docfx.json
+
+    - name: Upload documentation artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: docs/_site/
