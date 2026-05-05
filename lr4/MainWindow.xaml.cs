@@ -6,7 +6,7 @@ using System.Windows.Threading;
 using LumaChat.Services;
 using LumaChat.ViewModels;
 
-[assembly: InternalsVisibleTo("lr4.Tests")]
+[assembly: InternalsVisibleTo("lr4.tests")]
 
 namespace LumaChat;
 
