@@ -11,5 +11,6 @@ namespace LumaChat.Models
         public string? FilePath { get; set; }
         public string? FileName { get; set; }
         public double TransferProgress { get; set; } // 0..1
+        public bool IsFileTransfer => !string.IsNullOrEmpty(FilePath);
     }
 }
