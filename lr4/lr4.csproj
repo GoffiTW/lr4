@@ -12,4 +12,8 @@
     <None Include=".github\workflows\ci.yml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
+  </ItemGroup>
+
 </Project>
