@@ -13,6 +13,18 @@ public partial class ChatMessage : ObservableObject
     private string message = string.Empty;
 
     [ObservableProperty]
+    private string originalMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool isTranslated;
+
+    [ObservableProperty]
+    private bool isTranslating;
+
+    [ObservableProperty]
+    private bool canTranslate;
+
+    [ObservableProperty]
     private string time = string.Empty;
 
     [ObservableProperty]

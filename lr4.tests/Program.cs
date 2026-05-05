@@ -32,7 +32,22 @@ internal static class Program
         TestIsLikelyLanIp();
         TestDiscoveryParsing();
         TestChatServiceMessageRoundTrip();
+        TestTranslationParser();
         Console.WriteLine("All individual tests passed.");
+    }
+
+    private static void TestTranslationParser()
+    {
+        const string sample = "[[[\"\\u041f\\u0440\\u0438\\u0432\\u0435\\u0442\",\"hello\",null,null,1]],null,\"en\",null,null,null,1,[],[[\"en\"],null,[1],[\"en\"]]]";
+        string? result = LumaChat.Services.TranslationService.ParseGoogleTranslateResponse(sample);
+        AssertEqual("Привет", result, "Translation parser should extract Russian translation");
+
+        const string multi = "[[[\"\\u0414\\u043e\\u0431\\u0440\\u044b\\u0439 \\u0434\\u0435\\u043d\\u044c.\",\"Good day. \",null,null,1],[\" \\u041a\\u0430\\u043a \\u0434\\u0435\\u043b\\u0430?\",\" How are you?\",null,null,1]],null,\"en\"]";
+        string? multiResult = LumaChat.Services.TranslationService.ParseGoogleTranslateResponse(multi);
+        AssertEqual("Добрый день. Как дела?", multiResult, "Translation parser should concatenate sentences");
+
+        string? badResult = LumaChat.Services.TranslationService.ParseGoogleTranslateResponse("not json");
+        AssertEqual(null, badResult, "Translation parser should return null on invalid input");
     }
 
     private static void TestChatServiceMessageRoundTrip()

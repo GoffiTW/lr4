@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IPresenceService _presence;
     private readonly IHistoryService _history;
     private readonly IDialogService _dialog;
+    private readonly ITranslationService? _translation;
     private readonly Action<Action> _dispatch;
 
     public ObservableCollection<ChatMessage> Messages { get; } = new();
@@ -81,12 +82,14 @@ public partial class MainViewModel : ObservableObject
         IPresenceService presence,
         IHistoryService history,
         IDialogService dialog,
-        Action<Action>? dispatcher = null)
+        Action<Action>? dispatcher = null,
+        ITranslationService? translation = null)
     {
         _chat = chat;
         _presence = presence;
         _history = history;
         _dialog = dialog;
+        _translation = translation;
         _dispatch = dispatcher ?? (a => a());
 
         _chat.StateChanged += (_, state) => _dispatch(() =>
@@ -270,6 +273,46 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ToggleTranslateAsync(ChatMessage? msg)
+    {
+        if (msg == null || msg.System) return;
+        if (msg.IsTranslated)
+        {
+            msg.Message = msg.OriginalMessage;
+            msg.IsTranslated = false;
+            return;
+        }
+        if (_translation == null)
+        {
+            AddSystemMessage("Сервис перевода недоступен.");
+            return;
+        }
+        if (msg.IsTranslating) return;
+        msg.IsTranslating = true;
+        try
+        {
+            string translated = await _translation.TranslateAsync(msg.OriginalMessage);
+            if (!string.IsNullOrEmpty(translated) && translated != msg.OriginalMessage)
+            {
+                msg.Message = translated;
+                msg.IsTranslated = true;
+            }
+            else
+            {
+                AddSystemMessage("Перевод не получен (возможно, текст уже на русском или нет сети).");
+            }
+        }
+        catch (Exception ex)
+        {
+            AddSystemMessage($"Ошибка перевода: {ex.Message}");
+        }
+        finally
+        {
+            msg.IsTranslating = false;
+        }
+    }
+
+    [RelayCommand]
     private void OpenFile(string? path)
     {
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -321,6 +364,8 @@ public partial class MainViewModel : ObservableObject
         {
             Author = author,
             Message = text,
+            OriginalMessage = text,
+            CanTranslate = !system && _translation != null,
             Time = DateTime.Now.ToString("HH:mm"),
             Own = own,
             System = system,

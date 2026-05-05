@@ -22,10 +22,12 @@ public partial class MainWindow : Window
         var chat = new ChatService(history);
         var presence = new PresenceService();
         var dialog = new DialogService();
+        var translation = new TranslationService();
 
         _viewModel = new MainViewModel(
             chat, presence, history, dialog,
-            dispatcher: action => Dispatcher.Invoke(action));
+            dispatcher: action => Dispatcher.Invoke(action),
+            translation: translation);
 
         DataContext = _viewModel;
 
