@@ -99,6 +99,16 @@ public partial class MainViewModel : ObservableObject
                 ConnectionState.Connecting => "Подключаемся",
                 _ => "Не подключено"
             };
+            OnPropertyChanged(nameof(IsConnected));
+            OnPropertyChanged(nameof(IsBusy));
+            OnPropertyChanged(nameof(HeroStatusText));
+            OnPropertyChanged(nameof(StatusBrush));
+            SendCommand.NotifyCanExecuteChanged();
+            AttachCommand.NotifyCanExecuteChanged();
+            HostCommand.NotifyCanExecuteChanged();
+            ConnectCommand.NotifyCanExecuteChanged();
+            DisconnectCommand.NotifyCanExecuteChanged();
+            RefreshContactsCommand.NotifyCanExecuteChanged();
         });
         _chat.SystemMessage += (_, msg) => _dispatch(() => AddSystemMessage(msg));
         _chat.TextReceived += (_, args) => _dispatch(() => AddMessage(args.Author, args.Text, false));
@@ -174,11 +184,26 @@ public partial class MainViewModel : ObservableObject
     {
         string text = (ComposedMessage ?? "").Trim();
         if (string.IsNullOrWhiteSpace(text)) return;
-        await _chat.SendTextAsync(text);
-        if (_chat.State == ConnectionState.Connected)
+        if (!IsConnected)
         {
-            AddMessage(GetOwnName(), text, true);
+            AddSystemMessage("Сначала подключитесь.");
+            return;
         }
+        try
+        {
+            await _chat.SendTextAsync(text);
+        }
+        catch (Exception ex)
+        {
+            AddSystemMessage($"Ошибка отправки: {ex.Message}");
+            return;
+        }
+        if (_chat.State != ConnectionState.Connected)
+        {
+            AddSystemMessage("Соединение прервано — сообщение не доставлено.");
+            return;
+        }
+        AddMessage(GetOwnName(), text, true);
         ComposedMessage = string.Empty;
     }
 
@@ -242,6 +267,24 @@ public partial class MainViewModel : ObservableObject
         Messages.Clear();
         _history.Clear();
         AddSystemMessage("История очищена.");
+    }
+
+    [RelayCommand]
+    private void OpenFile(string? path)
+    {
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+            AddSystemMessage("Файл не найден.");
+            return;
+        }
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            AddSystemMessage($"Не удалось открыть файл: {ex.Message}");
+        }
     }
 
     [RelayCommand]

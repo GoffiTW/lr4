@@ -301,6 +301,11 @@
                                                      Foreground="{StaticResource AccentMint}" Background="#30FFFFFF"/>
                                         <Border Grid.Row="2" CornerRadius="12" Background="#45FFFFFF" Margin="20,0,20,12" Padding="12,6" Height="30"
                                                 Visibility="{Binding ChipVisibility}" Cursor="Hand">
+                                            <Border.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick"
+                                                              Command="{Binding DataContext.OpenFileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              CommandParameter="{Binding FilePath}"/>
+                                            </Border.InputBindings>
                                             <TextBlock Text="{Binding ChipText}" Foreground="White" FontSize="11"/>
                                         </Border>
                                     </Grid>
@@ -322,9 +327,8 @@
                         <Button Grid.Column="0" Content="+" Style="{StaticResource ClearButtonStyle}" Width="48" Height="36" Margin="0,0,8,0"
                                 Command="{Binding AttachCommand}"/>
 
-                        <TextBox Grid.Column="1" Style="{StaticResource FieldStyle}" MinHeight="36" MaxHeight="80"
+                        <TextBox x:Name="MessageTextBox" Grid.Column="1" Style="{StaticResource FieldStyle}" MinHeight="36" MaxHeight="80"
                                  TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
-                                 IsEnabled="{Binding IsConnected}"
                                  Text="{Binding ComposedMessage, UpdateSourceTrigger=PropertyChanged}"
                                  KeyDown="MessageTextBox_KeyDown"/>
 

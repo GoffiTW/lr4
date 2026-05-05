@@ -31,7 +31,41 @@ internal static class Program
         TestGetLocalIpAddresses();
         TestIsLikelyLanIp();
         TestDiscoveryParsing();
+        TestChatServiceMessageRoundTrip();
         Console.WriteLine("All individual tests passed.");
+    }
+
+    private static void TestChatServiceMessageRoundTrip()
+    {
+        var hostSvc = new LumaChat.Services.ChatService();
+        var clientSvc = new LumaChat.Services.ChatService();
+
+        string? receivedByHost = null;
+        string? receivedByClient = null;
+        hostSvc.TextReceived += (_, e) => receivedByHost = e.Text;
+        clientSvc.TextReceived += (_, e) => receivedByClient = e.Text;
+
+        const int port = 5061;
+        var hostTask = hostSvc.HostAsync(port, "Host");
+        System.Threading.Thread.Sleep(300);
+        clientSvc.ConnectAsync("127.0.0.1", port, "Client").GetAwaiter().GetResult();
+        System.Threading.Thread.Sleep(500);
+
+        AssertEqual(LumaChat.Services.ConnectionState.Connected, hostSvc.State, "Host should be connected");
+        AssertEqual(LumaChat.Services.ConnectionState.Connected, clientSvc.State, "Client should be connected");
+        AssertTrue(hostSvc.UseLumaProtocol, "Host should use Luma");
+        AssertTrue(clientSvc.UseLumaProtocol, "Client should use Luma");
+
+        clientSvc.SendTextAsync("hello-from-client").GetAwaiter().GetResult();
+        System.Threading.Thread.Sleep(300);
+        hostSvc.SendTextAsync("hello-from-host").GetAwaiter().GetResult();
+        System.Threading.Thread.Sleep(300);
+
+        AssertEqual("hello-from-client", receivedByHost ?? "", "Host should receive client message");
+        AssertEqual("hello-from-host", receivedByClient ?? "", "Client should receive host message");
+
+        clientSvc.Disconnect();
+        hostSvc.Disconnect();
     }
 
     private static void TestEncodeDecode()
