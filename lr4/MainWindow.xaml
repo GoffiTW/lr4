@@ -316,7 +316,8 @@
                 </ScrollViewer>
 
                 <!-- Composer -->
-                <Border Grid.Row="2" Background="#F4142034" CornerRadius="20" Padding="12" Margin="12,8,12,12">
+                <Border Grid.Row="2" Background="#F4142034" CornerRadius="20" Padding="12" Margin="12,8,12,12"
+                        MouseLeftButtonDown="ComposerBorder_MouseLeftButtonDown">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -329,6 +330,7 @@
 
                         <TextBox x:Name="MessageTextBox" Grid.Column="1" Style="{StaticResource FieldStyle}" MinHeight="36" MaxHeight="80"
                                  TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 Focusable="True" IsTabStop="True"
                                  Text="{Binding ComposedMessage, UpdateSourceTrigger=PropertyChanged}"
                                  KeyDown="MessageTextBox_KeyDown"/>
 
@@ -336,8 +338,6 @@
                                 Command="{Binding SendCommand}"/>
                     </Grid>
                 </Border>
-
-                <TextBlock Grid.Row="2" Text="Enter - отправить, Shift+Enter - новая строка" Foreground="#FF8094AA" FontSize="8" Margin="28,-18,0,0"/>
             </Grid>
         </Border>
     </Grid>

@@ -46,4 +46,10 @@ public partial class MainWindow : Window
                 _viewModel.SendCommand.Execute(null);
         }
     }
+
+    private void ComposerBorder_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        MessageTextBox.Focus();
+        Keyboard.Focus(MessageTextBox);
+    }
 }
