@@ -1,47 +1,31 @@
-```gitignore
+```
 # Build artifacts
 bin/
 obj/
-*.exe
 *.dll
+*.exe
 *.pdb
 *.so
 *.dylib
-*.o
-*.obj
-*.out
 *.class
 
 # Dependencies
 packages/
 node_modules/
 .nuget/
-.nyc_output/
-coverage/
-
-# IDE files
-.vs/
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
 
 # Logs
 *.log
-
-# Environment
-.env
-.env.local
-.env.*
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# Output directories
-dist/
-build/
-target/
-out/
+# User-specific files
+.vs/
+.idea/
+*.userprefs
+
+# Configuration files
+appsettings.Production.json
 ```
