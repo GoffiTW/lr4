@@ -1,0 +1,3 @@
+<manifest>
+  <assembly fullname="System.Diagnostics.DiagnosticSource" />
+</manifest>
