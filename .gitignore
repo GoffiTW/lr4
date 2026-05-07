@@ -2,30 +2,50 @@
 # Build artifacts
 bin/
 obj/
-*.dll
 *.exe
+*.dll
 *.pdb
-*.so
-*.dylib
-*.class
+*.nupkg
+*.snupkg
 
-# Dependencies
-packages/
-node_modules/
-.nuget/
+# IDE files
+.vs/
+.vscode/
+*.userprefs
+*.userosscache
+*.suo
+*.user
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
 
 # Logs
 *.log
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
 
 # User-specific files
-.vs/
-.idea/
-*.userprefs
-
-# Configuration files
-appsettings.Production.json
+*.tmp
+*.temp
+*.bak
+*.backup
 ```
