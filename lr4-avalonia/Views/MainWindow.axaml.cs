@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using LumaChat.Models;
 using LumaChat.ViewModels;
 
 namespace LumaChat.Views;
@@ -41,6 +42,22 @@ public partial class MainWindow : Window
             e.Handled = true;
             if (_viewModel.SendCommand.CanExecute(null))
                 _viewModel.SendCommand.Execute(null);
+        }
+    }
+
+    private void OnContactPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Border border && border.Tag is ContactInfo contact)
+        {
+            _viewModel.SelectContactCommand.Execute(contact);
+        }
+    }
+
+    private void OnFileChipPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Border border && border.Tag is string filePath)
+        {
+            _viewModel.OpenFileCommand.Execute(filePath);
         }
     }
 }

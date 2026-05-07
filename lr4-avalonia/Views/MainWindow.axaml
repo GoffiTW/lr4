@@ -55,20 +55,20 @@
                     <Border x:Name="border" CornerRadius="16" Background="{TemplateBinding Background}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsPointerOver" Value="True">
-                            <Setter TargetName="border" Property="Opacity" Value="0.85"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Opacity" Value="0.7"/>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Background" Value="#FF505A6E"/>
-                            <Setter Property="Foreground" Value="#FFA0AABA"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsPointerOver" Value="True">
+                    <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="border" Property="Background" Value="#FF505A6E"/>
+                    <Setter Property="Foreground" Value="#FFA0AABA"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="SendButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
@@ -190,12 +190,9 @@
                             <ItemsControl ItemsSource="{Binding Contacts}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Style="{StaticResource ContactItemStyle}">
-                                            <Border.InputBindings>
-                                                <InputBinding Gesture="LeftClick"
-                                                              Command="{Binding $parent[ItemsControl].DataContext.SelectContactCommand}"
-                                                              CommandParameter="{Binding}"/>
-                                            </Border.InputBindings>
+                                        <Border Style="{StaticResource ContactItemStyle}"
+                                                PointerPressed="OnContactPointerPressed"
+                                                Tag="{Binding}">
                                             <Grid Margin="8,4" ColumnDefinitions="Auto,*">
                                                 <Ellipse Grid.Column="0" Width="10" Height="10" Fill="#2DE2B0" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                                 <StackPanel Grid.Column="1">
@@ -284,12 +281,9 @@
                                         <ProgressBar Grid.Row="2" Height="4" Margin="20,0,20,12" Value="{Binding Progress}" IsVisible="{Binding ProgressVisibility}"
                                                      Foreground="{StaticResource AccentMint}" Background="#30FFFFFF"/>
                                         <Border Grid.Row="2" CornerRadius="12" Background="#45FFFFFF" Margin="20,0,20,12" Padding="12,6" Height="30"
-                                                IsVisible="{Binding ChipVisibility}" Cursor="Hand">
-                                            <Border.InputBindings>
-                                                <InputBinding Gesture="LeftClick"
-                                                              Command="{Binding $parent[ItemsControl].DataContext.OpenFileCommand}"
-                                                              CommandParameter="{Binding FilePath}"/>
-                                            </Border.InputBindings>
+                                                IsVisible="{Binding ChipVisibility}" Cursor="Hand"
+                                                PointerPressed="OnFileChipPointerPressed"
+                                                Tag="{Binding FilePath}">
                                             <TextBlock Text="{Binding ChipText}" Foreground="White" FontSize="11"/>
                                         </Border>
                                     </Grid>
