@@ -1,4 +1,4 @@
-﻿<Window x:Class="LumaChat.MainWindow"
+<Window x:Class="LumaChat.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Luma TCP Chat" Height="720" Width="1200"
@@ -8,6 +8,8 @@
         Background="#FF0B1220">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+
         <SolidColorBrush x:Key="TextStrong" Color="#FFF6FAFC"/>
         <SolidColorBrush x:Key="TextMuted" Color="#FF9BAEC3"/>
         <SolidColorBrush x:Key="AccentMint" Color="#FF2DE2B0"/>
@@ -117,17 +119,6 @@
             </Setter>
         </Style>
 
-        <Style x:Key="DiscoveryButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#FF599DFF" Offset="0"/>
-                        <GradientStop Color="#FF4179E0" Offset="1"/>
-                    </LinearGradientBrush>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <Style x:Key="DisconnectButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
             <Setter Property="Background">
                 <Setter.Value>
@@ -139,7 +130,6 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для контакта -->
         <Style x:Key="ContactItemStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Margin" Value="0,2"/>
@@ -173,8 +163,8 @@
                     <StackPanel Margin="16,8">
                         <TextBlock Text="СТАТУС" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock x:Name="StatusDot" Text="●" Foreground="{StaticResource AccentRed}" FontSize="14" Margin="0,0,8,0"/>
-                            <TextBlock x:Name="StatusLabel" Text="Не подключено" Foreground="{StaticResource TextStrong}" FontSize="13" FontWeight="SemiBold"/>
+                            <TextBlock Text="●" Foreground="{Binding StatusBrush}" FontSize="14" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource TextStrong}" FontSize="13" FontWeight="SemiBold"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -183,20 +173,28 @@
                 <Border Style="{StaticResource SidebarCardStyle}" Height="120" Margin="0,0,0,12">
                     <StackPanel Margin="16,10">
                         <TextBlock Text="ПРОФИЛЬ" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                        <TextBox x:Name="NameTextBox" Style="{StaticResource FieldStyle}" Height="36" Text="Пользователь" Margin="0,0,0,8"/>
-                        <TextBlock x:Name="LocalIpLabel" Text="Адрес этого ПК: получение..." Foreground="#FFB7CEE0" FontSize="10"/>
+                        <TextBox Style="{StaticResource FieldStyle}" Height="36" Margin="0,0,0,8"
+                                 Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="{Binding LocalIpText}" Foreground="#FFB7CEE0" FontSize="10"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Connection Card -->
-                <Border Style="{StaticResource SidebarCardStyle}" Height="196" Margin="0,0,0,12">
+                <Border Style="{StaticResource SidebarCardStyle}" Height="220" Margin="0,0,0,12">
                     <StackPanel Margin="16,10">
                         <TextBlock Text="ПОДКЛЮЧЕНИЕ" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                        <TextBox x:Name="IpTextBox" Style="{StaticResource FieldStyle}" Height="36" Text="127.0.0.1" Margin="0,0,0,8"/>
-                        <TextBox x:Name="PortTextBox" Style="{StaticResource FieldStyle}" Height="36" Text="5000" Margin="0,0,0,12"/>
+                        <TextBlock Text="IP другого ПК" Foreground="{StaticResource TextMuted}" FontSize="10" Margin="0,0,0,2"/>
+                        <TextBox Style="{StaticResource FieldStyle}" Height="36" Margin="0,0,0,6"
+                                 ToolTip="Введите IP вручную или выберите контакт ниже"
+                                 Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Порт" Foreground="{StaticResource TextMuted}" FontSize="10" Margin="0,0,0,2"/>
+                        <TextBox Style="{StaticResource FieldStyle}" Height="36" Margin="0,0,0,12"
+                                 Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button x:Name="HostButton" Content="Создать" Style="{StaticResource HostButtonStyle}" Width="120" Height="34" Margin="0,0,6,0"/>
-                            <Button x:Name="ConnectButton" Content="Войти" Style="{StaticResource ConnectButtonStyle}" Width="120" Height="34" Margin="6,0,0,0"/>
+                            <Button Content="Создать" Style="{StaticResource HostButtonStyle}" Width="120" Height="34" Margin="0,0,6,0"
+                                    Command="{Binding HostCommand}"/>
+                            <Button Content="Войти" Style="{StaticResource ConnectButtonStyle}" Width="120" Height="34" Margin="6,0,0,0"
+                                    Command="{Binding ConnectCommand}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -205,12 +203,18 @@
                 <Border Style="{StaticResource SidebarCardStyle}" Height="220" Margin="0,0,0,12">
                     <StackPanel Margin="16,10">
                         <TextBlock Text="АКТИВНЫЕ КОНТАКТЫ" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                        <Button x:Name="RefreshContactsButton" Content="Обновить" Style="{StaticResource ClearButtonStyle}" Height="30" Margin="0,0,0,8"/>
+                        <Button Content="Обновить" Style="{StaticResource ClearButtonStyle}" Height="30" Margin="0,0,0,8"
+                                Command="{Binding RefreshContactsCommand}"/>
                         <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl x:Name="ContactsPanel">
+                            <ItemsControl ItemsSource="{Binding Contacts}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Style="{StaticResource ContactItemStyle}" MouseLeftButtonUp="Contact_Click">
+                                        <Border Style="{StaticResource ContactItemStyle}">
+                                            <Border.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick"
+                                                              Command="{Binding DataContext.SelectContactCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              CommandParameter="{Binding}"/>
+                                            </Border.InputBindings>
                                             <Grid Margin="8,4">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -227,11 +231,13 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                        <TextBlock x:Name="ContactsPlaceholder" Text="Контакты не найдены" Foreground="#FF90A4BA" FontSize="9" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="Контакты не найдены. Введите IP вручную." Foreground="#FF90A4BA" FontSize="9" HorizontalAlignment="Center" Margin="0,4,0,0"
+                                   Visibility="{Binding ContactsPlaceholderVisible, Converter={StaticResource BoolToVisibility}}"/>
                     </StackPanel>
                 </Border>
 
-                <Button x:Name="DisconnectButton" Content="Отключиться" Style="{StaticResource DisconnectButtonStyle}" Height="38" Margin="0,0,0,8"/>
+                <Button Content="Отключиться" Style="{StaticResource DisconnectButtonStyle}" Height="38" Margin="0,0,0,8"
+                        Command="{Binding DisconnectCommand}"/>
             </StackPanel>
         </ScrollViewer>
 
@@ -262,16 +268,17 @@
                         <TextBlock Text="Сообщения идут напрямую, без сервера и без интернета" Foreground="{StaticResource TextMuted}" FontSize="10"/>
                     </StackPanel>
 
-                    <Button x:Name="ClearHistoryButton" Grid.Column="2" Content="Очистить" Style="{StaticResource ClearButtonStyle}" Width="100" Height="34" Margin="0,0,12,0"/>
+                    <Button Grid.Column="2" Content="Очистить" Style="{StaticResource ClearButtonStyle}" Width="100" Height="34" Margin="0,0,12,0"
+                            Command="{Binding ClearHistoryCommand}"/>
 
                     <Border Grid.Column="3" Background="#E517253A" CornerRadius="20" Padding="16,6" Height="38">
-                        <TextBlock x:Name="HeroStatusLabel" Text="Готов к старту" Foreground="#FFC4DAEA" FontWeight="SemiBold" FontSize="11"/>
+                        <TextBlock Text="{Binding HeroStatusText}" Foreground="#FFC4DAEA" FontWeight="SemiBold" FontSize="11"/>
                     </Border>
                 </Grid>
 
                 <!-- Messages Panel -->
                 <ScrollViewer x:Name="MessagesScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#0E182A">
-                    <ItemsControl x:Name="MessagesPanel">
+                    <ItemsControl ItemsSource="{Binding Messages}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="{Binding Margin}" CornerRadius="22" BorderThickness="1" BorderBrush="#4A99AABE"
@@ -283,18 +290,48 @@
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         <Border Grid.RowSpan="3" Width="4" CornerRadius="2" Background="{Binding StripColor}" HorizontalAlignment="Left" Margin="4,12,0,12"/>
-                                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,12,16,0">
-                                            <TextBlock Text="{Binding Author}" Foreground="#E4F6FA" FontSize="11" FontWeight="Bold"/>
-                                            <TextBlock Text=" / " Foreground="#9BAEC3" FontSize="10"/>
-                                            <TextBlock Text="{Binding Time}" Foreground="#9BAEC3" FontSize="10"/>
-                                        </StackPanel>
+                                        <Grid Grid.Row="0" Margin="20,12,16,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Author}" Foreground="#E4F6FA" FontSize="11" FontWeight="Bold"/>
+                                                <TextBlock Text=" / " Foreground="#9BAEC3" FontSize="10"/>
+                                                <TextBlock Text="{Binding Time}" Foreground="#9BAEC3" FontSize="10"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" FontSize="10" Padding="8,2" Margin="8,0,0,0"
+                                                    Visibility="{Binding CanTranslate, Converter={StaticResource BoolToVisibility}}"
+                                                    Command="{Binding DataContext.ToggleTranslateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#33FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Content" Value="🌐 Перевести"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsTranslated}" Value="True">
+                                                                <Setter Property="Content" Value="↺ Оригинал"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsTranslating}" Value="True">
+                                                                <Setter Property="Content" Value="…"/>
+                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </Grid>
                                         <TextBlock Grid.Row="1" Text="{Binding Message}" TextWrapping="Wrap" Foreground="White" FontSize="14" Margin="20,4,16,8" MaxWidth="400"/>
 
-                                        <!-- Progress Bar для файлов -->
                                         <ProgressBar Grid.Row="2" Height="4" Margin="20,0,20,12" Value="{Binding Progress}" Visibility="{Binding ProgressVisibility}"
                                                      Foreground="{StaticResource AccentMint}" Background="#30FFFFFF"/>
-                                        <Border Grid.Row="2" x:Name="Chip" CornerRadius="12" Background="#45FFFFFF" Margin="20,0,20,12" Padding="12,6" Height="30"
+                                        <Border Grid.Row="2" CornerRadius="12" Background="#45FFFFFF" Margin="20,0,20,12" Padding="12,6" Height="30"
                                                 Visibility="{Binding ChipVisibility}" Cursor="Hand">
+                                            <Border.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick"
+                                                              Command="{Binding DataContext.OpenFileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              CommandParameter="{Binding FilePath}"/>
+                                            </Border.InputBindings>
                                             <TextBlock Text="{Binding ChipText}" Foreground="White" FontSize="11"/>
                                         </Border>
                                     </Grid>
@@ -305,7 +342,8 @@
                 </ScrollViewer>
 
                 <!-- Composer -->
-                <Border Grid.Row="2" Background="#F4142034" CornerRadius="20" Padding="12" Margin="12,8,12,12">
+                <Border Grid.Row="2" Background="#F4142034" CornerRadius="20" Padding="12" Margin="12,8,12,12"
+                        MouseLeftButtonDown="ComposerBorder_MouseLeftButtonDown">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -313,16 +351,19 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <Button x:Name="AttachButton" Grid.Column="0" Content="+" Style="{StaticResource ClearButtonStyle}" Width="48" Height="36" Margin="0,0,8,0"/>
+                        <Button Grid.Column="0" Content="+" Style="{StaticResource ClearButtonStyle}" Width="48" Height="36" Margin="0,0,8,0"
+                                Command="{Binding AttachCommand}"/>
 
-                        <TextBox x:Name="MessageTextBox" Grid.Column="1" Style="{StaticResource FieldStyle}" MinHeight="36" MaxHeight="80" 
-                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox x:Name="MessageTextBox" Grid.Column="1" Style="{StaticResource FieldStyle}" MinHeight="36" MaxHeight="80"
+                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 Focusable="True" IsTabStop="True"
+                                 Text="{Binding ComposedMessage, UpdateSourceTrigger=PropertyChanged}"
+                                 KeyDown="MessageTextBox_KeyDown"/>
 
-                        <Button x:Name="SendButton" Grid.Column="2" Content="Отправить" Style="{StaticResource SendButtonStyle}" Width="100" Height="36" Margin="8,0,0,0"/>
+                        <Button Grid.Column="2" Content="Отправить" Style="{StaticResource SendButtonStyle}" Width="100" Height="36" Margin="8,0,0,0"
+                                Command="{Binding SendCommand}"/>
                     </Grid>
                 </Border>
-
-                <TextBlock Grid.Row="2" Text="Enter - отправить, Shift+Enter - новая строка" Foreground="#FF8094AA" FontSize="8" Margin="28,-18,0,0"/>
             </Grid>
         </Border>
     </Grid>

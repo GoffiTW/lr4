@@ -31,7 +31,56 @@ internal static class Program
         TestGetLocalIpAddresses();
         TestIsLikelyLanIp();
         TestDiscoveryParsing();
+        TestChatServiceMessageRoundTrip();
+        TestTranslationParser();
         Console.WriteLine("All individual tests passed.");
+    }
+
+    private static void TestTranslationParser()
+    {
+        const string sample = "[[[\"\\u041f\\u0440\\u0438\\u0432\\u0435\\u0442\",\"hello\",null,null,1]],null,\"en\",null,null,null,1,[],[[\"en\"],null,[1],[\"en\"]]]";
+        string? result = LumaChat.Services.TranslationService.ParseGoogleTranslateResponse(sample);
+        AssertEqual("Привет", result, "Translation parser should extract Russian translation");
+
+        const string multi = "[[[\"\\u0414\\u043e\\u0431\\u0440\\u044b\\u0439 \\u0434\\u0435\\u043d\\u044c.\",\"Good day. \",null,null,1],[\" \\u041a\\u0430\\u043a \\u0434\\u0435\\u043b\\u0430?\",\" How are you?\",null,null,1]],null,\"en\"]";
+        string? multiResult = LumaChat.Services.TranslationService.ParseGoogleTranslateResponse(multi);
+        AssertEqual("Добрый день. Как дела?", multiResult, "Translation parser should concatenate sentences");
+
+        string? badResult = LumaChat.Services.TranslationService.ParseGoogleTranslateResponse("not json");
+        AssertEqual(null, badResult, "Translation parser should return null on invalid input");
+    }
+
+    private static void TestChatServiceMessageRoundTrip()
+    {
+        var hostSvc = new LumaChat.Services.ChatService();
+        var clientSvc = new LumaChat.Services.ChatService();
+
+        string? receivedByHost = null;
+        string? receivedByClient = null;
+        hostSvc.TextReceived += (_, e) => receivedByHost = e.Text;
+        clientSvc.TextReceived += (_, e) => receivedByClient = e.Text;
+
+        const int port = 5061;
+        var hostTask = hostSvc.HostAsync(port, "Host");
+        System.Threading.Thread.Sleep(300);
+        clientSvc.ConnectAsync("127.0.0.1", port, "Client").GetAwaiter().GetResult();
+        System.Threading.Thread.Sleep(500);
+
+        AssertEqual(LumaChat.Services.ConnectionState.Connected, hostSvc.State, "Host should be connected");
+        AssertEqual(LumaChat.Services.ConnectionState.Connected, clientSvc.State, "Client should be connected");
+        AssertTrue(hostSvc.UseLumaProtocol, "Host should use Luma");
+        AssertTrue(clientSvc.UseLumaProtocol, "Client should use Luma");
+
+        clientSvc.SendTextAsync("hello-from-client").GetAwaiter().GetResult();
+        System.Threading.Thread.Sleep(300);
+        hostSvc.SendTextAsync("hello-from-host").GetAwaiter().GetResult();
+        System.Threading.Thread.Sleep(300);
+
+        AssertEqual("hello-from-client", receivedByHost ?? "", "Host should receive client message");
+        AssertEqual("hello-from-host", receivedByClient ?? "", "Client should receive host message");
+
+        clientSvc.Disconnect();
+        hostSvc.Disconnect();
     }
 
     private static void TestEncodeDecode()
