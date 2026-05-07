@@ -1,0 +1,319 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LumaChat.MainWindow"
+        Title="Luma TCP Chat" Height="720" Width="1200"
+        MinHeight="600" MinWidth="1000"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#0B1220">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="TextStrong" Color="#FFF6FAFC"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#FF9BAEC3"/>
+        <SolidColorBrush x:Key="AccentMint" Color="#FF2DE2B0"/>
+        <SolidColorBrush x:Key="AccentBlue" Color="#FF599DFF"/>
+        <SolidColorBrush x:Key="AccentOrange" Color="#FFFFBE58"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#FFFF6879"/>
+
+        <LinearGradientBrush x:Key="HeroGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FF2DE2B0" Offset="0"/>
+            <GradientStop Color="#FF599DFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="GlassPanelStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Background" Value="#E00C1424"/>
+            <Setter Property="BorderBrush" Value="#4E96D2DC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="SidebarCardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Background" Value="#D618263D"/>
+            <Setter Property="BorderBrush" Value="#4A6CA1B8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="FieldStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#1A1E32"/>
+            <Setter Property="Foreground" Value="{StaticResource TextStrong}"/>
+            <Setter Property="BorderBrush" Value="#3A6A9DAC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentMint}"/>
+        </Style>
+
+        <Style x:Key="RoundedButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border x:Name="border" CornerRadius="16" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsPointerOver" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background" Value="#FF505A6E"/>
+                            <Setter Property="Foreground" Value="#FFA0AABA"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SendButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#FF2DE2B0" Offset="0"/>
+                    <GradientStop Color="#FF1CAB94" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ClearButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#FF4A6DA2" Offset="0"/>
+                    <GradientStop Color="#FF5A80BA" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <Style x:Key="HostButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#FF2DE2B0" Offset="0"/>
+                    <GradientStop Color="#FF1AAB8F" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ConnectButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#FF599DFF" Offset="0"/>
+                    <GradientStop Color="#FF4179E0" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DisconnectButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundedButtonStyle}">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#FFFF6879" Offset="0"/>
+                    <GradientStop Color="#FFD14B5E" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ContactItemStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Background" Value="#24FFFFFF"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="42"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid ColumnDefinitions="320,*">
+        <!-- Sidebar -->
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Background="Transparent">
+            <StackPanel Margin="16,16,8,16">
+
+                <!-- Hero Card -->
+                <Border Style="{StaticResource GlassPanelStyle}" Height="80" Margin="0,0,0,12">
+                    <StackPanel Margin="16,12">
+                        <TextBlock Text="LUMA LINK" Foreground="{StaticResource AccentMint}" FontSize="10" FontWeight="Bold"/>
+                        <TextBlock Text="TCP Chat" Foreground="{StaticResource TextStrong}" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock Text="Два ПК, одна сеть, прямой TCP" Foreground="{StaticResource TextMuted}" FontSize="9"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Status Card -->
+                <Border Style="{StaticResource SidebarCardStyle}" Height="64" Margin="0,0,0,12">
+                    <StackPanel Margin="16,8">
+                        <TextBlock Text="СТАТУС" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="●" Foreground="{Binding StatusBrush}" FontSize="14" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource TextStrong}" FontSize="13" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Profile Card -->
+                <Border Style="{StaticResource SidebarCardStyle}" Height="120" Margin="0,0,0,12">
+                    <StackPanel Margin="16,10">
+                        <TextBlock Text="ПРОФИЛЬ" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <TextBox Style="{StaticResource FieldStyle}" Height="36" Margin="0,0,0,8"
+                                 Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="{Binding LocalIpText}" Foreground="#FFB7CEE0" FontSize="10"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Connection Card -->
+                <Border Style="{StaticResource SidebarCardStyle}" Height="220" Margin="0,0,0,12">
+                    <StackPanel Margin="16,10">
+                        <TextBlock Text="ПОДКЛЮЧЕНИЕ" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <TextBlock Text="IP другого ПК" Foreground="{StaticResource TextMuted}" FontSize="10" Margin="0,0,0,2"/>
+                        <TextBox Style="{StaticResource FieldStyle}" Height="36" Margin="0,0,0,6"
+                                 ToolTip.Tip="Введите IP вручную или выберите контакт ниже"
+                                 Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Порт" Foreground="{StaticResource TextMuted}" FontSize="10" Margin="0,0,0,2"/>
+                        <TextBox Style="{StaticResource FieldStyle}" Height="36" Margin="0,0,0,12"
+                                 Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Content="Создать" Style="{StaticResource HostButtonStyle}" Width="120" Height="34" Margin="0,0,6,0"
+                                    Command="{Binding HostCommand}"/>
+                            <Button Content="Войти" Style="{StaticResource ConnectButtonStyle}" Width="120" Height="34" Margin="6,0,0,0"
+                                    Command="{Binding ConnectCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Active Contacts Card -->
+                <Border Style="{StaticResource SidebarCardStyle}" Height="220" Margin="0,0,0,12">
+                    <StackPanel Margin="16,10">
+                        <TextBlock Text="АКТИВНЫЕ КОНТАКТЫ" Foreground="#80EED5" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <Button Content="Обновить" Style="{StaticResource ClearButtonStyle}" Height="30" Margin="0,0,0,8"
+                                Command="{Binding RefreshContactsCommand}"/>
+                        <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Contacts}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource ContactItemStyle}">
+                                            <Border.InputBindings>
+                                                <InputBinding Gesture="LeftClick"
+                                                              Command="{Binding $parent[ItemsControl].DataContext.SelectContactCommand}"
+                                                              CommandParameter="{Binding}"/>
+                                            </Border.InputBindings>
+                                            <Grid Margin="8,4" ColumnDefinitions="Auto,*">
+                                                <Ellipse Grid.Column="0" Width="10" Height="10" Fill="#2DE2B0" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                                                    <TextBlock Text="{Binding IpAddress}" Foreground="#9BAEC3" FontSize="10"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <TextBlock Text="Контакты не найдены. Введите IP вручную." Foreground="#FF90A4BA" FontSize="9" HorizontalAlignment="Center" Margin="0,4,0,0"
+                                   IsVisible="{Binding ContactsPlaceholderVisible}"/>
+                    </StackPanel>
+                </Border>
+
+                <Button Content="Отключиться" Style="{StaticResource DisconnectButtonStyle}" Height="38" Margin="0,0,0,8"
+                        Command="{Binding DisconnectCommand}"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Chat Area -->
+        <Border Grid.Column="1" Margin="8,16,16,16" Style="{StaticResource GlassPanelStyle}">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <!-- Header -->
+                <Grid Grid.Row="0" Margin="20,12,20,8" ColumnDefinitions="Auto,*,Auto,Auto">
+                    <Border Grid.Column="0" Width="56" Height="56" CornerRadius="28" Background="{StaticResource HeroGradient}" Margin="0,0,16,0">
+                        <TextBlock Text="TCP" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Живой TCP-диалог" Foreground="{StaticResource TextStrong}" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="Сообщения идут напрямую, без сервера и без интернета" Foreground="{StaticResource TextMuted}" FontSize="10"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="2" Content="Очистить" Style="{StaticResource ClearButtonStyle}" Width="100" Height="34" Margin="0,0,12,0"
+                            Command="{Binding ClearHistoryCommand}"/>
+
+                    <Border Grid.Column="3" Background="#E517253A" CornerRadius="20" Padding="16,6" Height="38">
+                        <TextBlock Text="{Binding HeroStatusText}" Foreground="#FFC4DAEA" FontWeight="SemiBold" FontSize="11"/>
+                    </Border>
+                </Grid>
+
+                <!-- Messages Panel -->
+                <ScrollViewer x:Name="MessagesScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#0E182A">
+                    <ItemsControl ItemsSource="{Binding Messages}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="{Binding Margin}" CornerRadius="22" BorderThickness="1" BorderBrush="#4A99AABE"
+                                        Background="{Binding Background}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Border Grid.RowSpan="3" Width="4" CornerRadius="2" Background="{Binding StripColor}" HorizontalAlignment="Left" Margin="4,12,0,12"/>
+                                        <Grid Grid.Row="0" Margin="20,12,16,0" ColumnDefinitions="*,Auto">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Author}" Foreground="#E4F6FA" FontSize="11" FontWeight="Bold"/>
+                                                <TextBlock Text=" / " Foreground="#9BAEC3" FontSize="10"/>
+                                                <TextBlock Text="{Binding Time}" Foreground="#9BAEC3" FontSize="10"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" FontSize="10" Padding="8,2" Margin="8,0,0,0"
+                                                    IsVisible="{Binding CanTranslate}"
+                                                    Command="{Binding $parent[ItemsControl].DataContext.ToggleTranslateCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#33FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand">
+                                                <Button.Styles>
+                                                    <Style Selector="Button">
+                                                        <Setter Property="Content" Value="🌐 Перевести"/>
+                                                    </Style>
+                                                    <Style Selector="Button[data.IsTranslated=True]">
+                                                        <Setter Property="Content" Value="↺ Оригинал"/>
+                                                    </Style>
+                                                    <Style Selector="Button[data.IsTranslating=True]">
+                                                        <Setter Property="Content" Value="…"/>
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </Style>
+                                                </Button.Styles>
+                                            </Button>
+                                        </Grid>
+                                        <TextBlock Grid.Row="1" Text="{Binding Message}" TextWrapping="Wrap" Foreground="White" FontSize="14" Margin="20,4,16,8" MaxWidth="400"/>
+
+                                        <ProgressBar Grid.Row="2" Height="4" Margin="20,0,20,12" Value="{Binding Progress}" IsVisible="{Binding ProgressVisibility}"
+                                                     Foreground="{StaticResource AccentMint}" Background="#30FFFFFF"/>
+                                        <Border Grid.Row="2" CornerRadius="12" Background="#45FFFFFF" Margin="20,0,20,12" Padding="12,6" Height="30"
+                                                IsVisible="{Binding ChipVisibility}" Cursor="Hand">
+                                            <Border.InputBindings>
+                                                <InputBinding Gesture="LeftClick"
+                                                              Command="{Binding $parent[ItemsControl].DataContext.OpenFileCommand}"
+                                                              CommandParameter="{Binding FilePath}"/>
+                                            </Border.InputBindings>
+                                            <TextBlock Text="{Binding ChipText}" Foreground="White" FontSize="11"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Composer -->
+                <Border Grid.Row="2" Background="#F4142034" CornerRadius="20" Padding="12" Margin="12,8,12,12">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Button Grid.Column="0" Content="+" Style="{StaticResource ClearButtonStyle}" Width="48" Height="36" Margin="0,0,8,0"
+                                Command="{Binding AttachCommand}"/>
+
+                        <TextBox x:Name="MessageTextBox" Grid.Column="1" Style="{StaticResource FieldStyle}" MinHeight="36" MaxHeight="80"
+                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 Text="{Binding ComposedMessage, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <Button Grid.Column="2" Content="Отправить" Style="{StaticResource SendButtonStyle}" Width="100" Height="36" Margin="8,0,0,0"
+                                Command="{Binding SendCommand}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
