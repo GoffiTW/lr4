@@ -4,8 +4,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LumaChat.Models;
@@ -63,7 +64,7 @@ public partial class MainViewModel : ObservableObject
     public bool IsBusy => ConnectionState is ConnectionState.WaitingForClient or ConnectionState.Connecting;
     public bool IsConnected => ConnectionState == ConnectionState.Connected;
 
-    public Brush StatusBrush => ConnectionState switch
+    public IBrush StatusBrush => ConnectionState switch
     {
         ConnectionState.Connected => new SolidColorBrush(Color.FromRgb(0x2D, 0xE2, 0xB0)),
         ConnectionState.WaitingForClient or ConnectionState.Connecting => new SolidColorBrush(Color.FromRgb(0xFF, 0xBE, 0x58)),
