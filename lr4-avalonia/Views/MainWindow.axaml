@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LumaChat.ViewModels"
         x:Class="LumaChat.Views.MainWindow"
         Title="Luma TCP Chat" Height="720" Width="1200"
         MinHeight="600" MinWidth="1000"
